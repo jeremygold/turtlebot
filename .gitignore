@@ -1,0 +1,9 @@
+.pioenvs
+.piolibdeps
+.clang_complete
+.gcc-flags.json
+src/index_html.h
+.DS_Store
+password.txt
+src/auth.h
+*.swp

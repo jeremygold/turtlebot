@@ -1,0 +1,44 @@
+<!doctype html>
+
+<head>
+    <title>Turtlebot Web Control</title>
+
+    <link rel="stylesheet" type="text/css" href="http://bootswatch.com/cerulean/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+
+    <script>
+      function setSpeed(left, right) {
+          $.get("http://192.168.1.117/speed?left=" + left + "&right=" + right, function(data) {
+              $('#current_speed').html(data);
+          });
+      }
+    </script>
+</head>
+
+<body>
+
+    <table style="width:450px" border="0">
+        <tr>
+          <td colspan="3"><center><h1>Turtlebot Web Control</h1></center></td>
+        </tr>
+        <tr>
+            <td><button class="btn btn-primary btn-lg" style="width:150px" onclick="setSpeed('5','10')">Fwd Left</button></td>
+            <td><button class="btn btn-primary btn-lg" style="width:150px" onclick="setSpeed('10', '10')">Forward</button></td>
+            <td><button class="btn btn-primary btn-lg" style="width:150px" onclick="setSpeed('10','5')">Fwd Right</button></td>
+        </tr>
+        <tr>
+            <td><button class="btn btn-primary btn-lg" style="width:150px" onclick="setSpeed('-10', '10')">Left Turn</button></td>
+            <td><button class="btn btn-primary btn-lg" style="width:150px" onclick="setSpeed('0','0')">Stop</button></td>
+            <td><button class="btn btn-primary btn-lg" style="width:150px" onclick="setSpeed('10','-10')">Right Turn</button></td>
+        </tr>
+        <tr>
+            <td><button class="btn btn-primary btn-lg" style="width:150px" onclick="setSpeed('-5','-10')">Back Left</button></td>
+            <td><button class="btn btn-primary btn-lg" style="width:150px" onclick="setSpeed('-10', '-10')">Back</button></td>
+            <td><button class="btn btn-primary btn-lg" style="width:150px" onclick="setSpeed('-10','-5')">Back Right</button></td>
+        </tr>
+   </table>
+
+    <p>
+
+    <div id="current_speed">Current Speed:</div>
+</body>
