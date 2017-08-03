@@ -7,3 +7,5 @@ src/index_html.h
 password.txt
 src/auth.h
 *.swp
+lib
+
