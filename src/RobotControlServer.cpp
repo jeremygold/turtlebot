@@ -13,7 +13,7 @@
 Servo left_servo;
 Servo right_servo;
 
-const char * password;
+char password[16];
 AES128 aes128;
 
 // Wifi connection details
@@ -83,48 +83,37 @@ void decryptWifiAuth(BlockCipher *cipher){
   Serial.println("decrypting");
   // length of array , minus the null byte
   int inputStringLength = sizeof(ciphertext) -1;
-  char stringBuffer[20];
-  sprintf(stringBuffer, "input length:%d", inputStringLength);
-  Serial.println(stringBuffer);
-  Serial.println(ciphertext);
-  Serial.println();
+
   int decodedLength = Base64.decodedLength(ciphertext, inputStringLength);
-  sprintf(stringBuffer, "allocating bytes:%d", decodedLength);
-  Serial.println(stringBuffer);
+
   char decodedString[decodedLength];
   Base64.decode(decodedString, ciphertext, inputStringLength);
-  Serial.println(decodedString);
-
-  Serial.println("setting key");
+  // symmetric decrpytion key matching the encrption key in the generate cipher
+  // script
   cipher->setKey((uint8_t *)"turtlebot_3129_p", 16);
   byte buffer[16];
   uint8_t * ciphertextBytes;
-  Serial.println("decrypting cipher");
   cipher->decryptBlock(buffer, (uint8_t *)decodedString);
 
-  Serial.print("decrypted hex = ");
-  for (int i =0; i < 16 ; i++){
-    Serial.print( buffer[i], HEX);
-    Serial.print(" ");
-  }
-  Serial.print(" decrypted text = ");
-  char string[17];
-  memcpy(string, buffer, 16);
-  string[16]= '\0';
+  memcpy(password, buffer, 16);
   //need to strip spaces of the end of password
-  password = string;
-  Serial.println(password);
-
 }
+
 void setup(void){
   left_servo.attach(left_servo_pin);
   right_servo.attach(right_servo_pin);
 
   Serial.begin(115200);
   decryptWifiAuth(&aes128);
-  WiFi.begin(ssid, password);
-  Serial.println("");
-
+  //strip spaces
+  int i = 15; //password array
+  while (password[i--] == 0x20){
+  }
+  int password_length = i + 2; //plus 2 because post decrement....
+  char password_trimmed[password_length + 1];
+  memcpy(password_trimmed, password, password_length);
+  password_trimmed[password_length] = '\0';
+  WiFi.begin(ssid, password_trimmed);
   // Wait for connection
   while (WiFi.status() != WL_CONNECTED) {
     delay(500);

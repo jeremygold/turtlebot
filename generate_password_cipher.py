@@ -9,9 +9,7 @@ key = b"turtlebot_3129_p"
 
 def encrypt(plaintext):
   cipher = AES.new(key, AES.MODE_ECB, "")
-  ciphertext =cipher.encrypt(plaintext)
-  print ciphertext
-  print "decrpted = " + cipher.decrypt(ciphertext)
+  ciphertext = cipher.encrypt(plaintext)
   return base64.b64encode(ciphertext)
 
 def main():
