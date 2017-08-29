@@ -8,7 +8,7 @@
 
     <script>
       function setSpeed(left, right) {
-          $.get("http://192.168.1.117/speed?left=" + left + "&right=" + right, function(data) {
+          $.get("/speed?left=" + left + "&right=" + right, function(data) {
               $('#current_speed').html(data);
           });
       }
