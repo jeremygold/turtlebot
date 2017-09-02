@@ -2,16 +2,14 @@
 #include <WiFiClient.h>
 #include <ESP8266WebServer.h>
 #include <ESP8266mDNS.h>
-#include <Servo.h>
 #include "index_html.h"
 #include "auth.h"
 #include <Crypto.h>
 #include <AES.h>
 #include <string.h>
 #include <Base64.h>
-
-Servo left_servo;
-Servo right_servo;
+#include "Arduino.h"
+#include "motor.h"
 
 char password[16];
 AES128 aes128;
@@ -21,12 +19,17 @@ AES128 aes128;
 
 ESP8266WebServer server(80);
 
-const int left_servo_pin = 5;
-const int right_servo_pin = 4;
+typedef String (*handle_speed_t) (String arg0, String arg1);
+typedef void (*setup_t)(void);
+typedef struct motor_interface_t
+{
+    handle_speed_t handle_speed;
+    setup_t setup;
 
-// TODO: Web control for fine adjust of zero trim
-const int left_servo_zero = 94;
-const int right_servo_zero = 91;
+}motor_interface_t;
+
+motor_interface_t * motor;
+
 
 void handleRoot() {
   // Null terminate index.html
@@ -55,22 +58,7 @@ void handleSpeed(){
   String response = "";
 
   if(server.args() > 1) {
-    // Assume arg 1 is left wheel speed (in degrees), and arg 2 is right speed
-    String left_arg = server.arg(0);
-    int left_speed = left_arg.toInt();
-
-    String right_arg = server.arg(1);
-    int right_speed = right_arg.toInt();
-
-    // Right side gets negative speed since it's physically mounted the
-    // other way around.
-    left_servo.write(left_servo_zero + left_speed);
-    right_servo.write(right_servo_zero - right_speed);
-
-    response = "Left: ";
-    response += left_arg;
-    response += ", Right: ";
-    response += right_arg;
+    response = motor->handle_speed(server.arg(0),server.arg(1));
   }
   else {
     response = "Not enough arguments";
@@ -78,6 +66,8 @@ void handleSpeed(){
 
   server.send(200, "text/plain", response.c_str());
 }
+
+
 
 void decryptWifiAuth(BlockCipher *cipher){
   Serial.println("decrypting");
@@ -100,12 +90,14 @@ void decryptWifiAuth(BlockCipher *cipher){
 }
 
 void setup(void){
-  left_servo.attach(left_servo_pin);
-  right_servo.attach(right_servo_pin);
+
 
   Serial.begin(115200);
   decryptWifiAuth(&aes128);
   //strip spaces
+  motor->handle_speed = &handle_speed_implementation;
+  motor->setup = &setup_implementation;
+  motor->setup();
   int i = 15; //password array
   while (password[i--] == 0x20){
   }
@@ -139,4 +131,5 @@ void setup(void){
 
 void loop(void){
   server.handleClient();
+  delay(500);
 }
